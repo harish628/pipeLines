@@ -25,8 +25,8 @@ then
     echo "Deleting cluster..."
 
     kops delete cluster \
-    "${CLUSTER_NAME}" \
-    --yes
+        "${CLUSTER_NAME}" \
+        --yes
 
     echo "========================================"
     echo "Cluster deletion initiated successfully"
@@ -46,24 +46,30 @@ echo "========================================"
 echo "Checking S3 State Store"
 echo "========================================"
 
-
 if aws s3api head-bucket --bucket "${KOPS_STATE_BUCKET}" 2>/dev/null
 then
 
     echo "S3 bucket exists"
-    echo "Deleting bucket contents..."
 
-    aws s3 rm \
-    "s3://${KOPS_STATE_BUCKET}" \
-    --recursive
+    echo "Deleting all object versions..."
 
+    aws s3api list-object-versions \
+        --bucket "${KOPS_STATE_BUCKET}" \
+        --output json |
+    jq -c '.Versions[]?, .DeleteMarkers[]?' |
+    while read obj
+    do
+        aws s3api delete-object \
+            --bucket "${KOPS_STATE_BUCKET}" \
+            --key "$(echo "$obj" | jq -r '.Key')" \
+            --version-id "$(echo "$obj" | jq -r '.VersionId')"
+    done
 
-    echo "Deleting S3 bucket..."
+    echo "Deleting bucket..."
 
     aws s3api delete-bucket \
-    --bucket "${KOPS_STATE_BUCKET}" \
-    --region "${REGION}"
-
+        --bucket "${KOPS_STATE_BUCKET}" \
+        --region "${REGION}"
 
     echo "S3 bucket deleted successfully"
 
@@ -74,11 +80,7 @@ else
 
 fi
 
-
 echo ""
 echo "========================================"
 echo "Cleanup Completed"
 echo "========================================"
-=======
-fi
->>>>>>> 8db609ab21c789ea0c86c12cd081c1b3f1a71ea1
