@@ -53,12 +53,22 @@ then
 
     echo "Deleting all object versions..."
 
-    aws s3api list-object-versions \
+    echo "Listing object versions..."
+
+    OUTPUT=$(aws s3api list-object-versions \
         --bucket "${KOPS_STATE_BUCKET}" \
-        --output json |
-    jq -c '.Versions[]?, .DeleteMarkers[]?' |
+        --output json 2>&1)
+
+    echo "AWS CLI Output:"
+    echo "$OUTPUT"
+
+    echo "$OUTPUT" | jq .
+
+    echo "$OUTPUT" | jq -c '.Versions[]?, .DeleteMarkers[]?' |
     while read obj
     do
+        echo "Deleting: $obj"
+
         aws s3api delete-object \
             --bucket "${KOPS_STATE_BUCKET}" \
             --key "$(echo "$obj" | jq -r '.Key')" \
