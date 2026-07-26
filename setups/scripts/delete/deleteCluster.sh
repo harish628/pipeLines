@@ -39,7 +39,6 @@ else
     echo "Nothing to delete"
     echo "========================================"
 
-<<<<<<< HEAD
 fi
 
 echo ""
