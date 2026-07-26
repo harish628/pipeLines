@@ -34,8 +34,9 @@ else
     echo "Creating bucket..."
     
     aws s3api create-bucket \
-        --bucket "$BUCKET_NAME" \
-        --region "$REGION"
+    --bucket "$BUCKET_NAME" \
+    --region "$REGION" \
+    --create-bucket-configuration LocationConstraint="$REGION"
 
     echo "S3 bucket created successfully"
 
