@@ -147,6 +147,15 @@ pipeline {
                     '''
                 }
         }
+        stage('Install Helm') {
+
+            steps {
+                sh '''
+                        chmod +x setups/scripts/install/helm.sh
+                        bash setups/scripts/install/helm.sh
+                    '''
+            }
+        }
         
         stage('AWS Authentication') {
 
