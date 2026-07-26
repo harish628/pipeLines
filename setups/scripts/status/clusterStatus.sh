@@ -23,12 +23,13 @@ aws sts get-caller-identity
 
 
 echo ""
+echo ""
 echo "========================================"
 echo "Available KOps Clusters"
 echo "========================================"
 
 
-CLUSTERS=$(kops get clusters --output name)
+CLUSTERS=$(kops get clusters)
 
 
 if [ -z "$CLUSTERS" ]
