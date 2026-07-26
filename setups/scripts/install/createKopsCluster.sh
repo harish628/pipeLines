@@ -78,7 +78,7 @@ else
     echo "========================================"
 
 
-    sleep 250
+    sleep 350
 
 
     echo "Validating cluster..."
