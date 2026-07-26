@@ -53,7 +53,7 @@ then
     while read KEY VERSION
     do
         if [ -n "$KEY" ] && [ -n "$VERSION" ]; then
-            echo "Deleting object: $KEY"
+            #echo "Deleting object: $KEY"
             aws s3api delete-object \
                 --bucket "${KOPS_STATE_BUCKET}" \
                 --key "$KEY" \
