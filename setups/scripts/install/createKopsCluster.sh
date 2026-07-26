@@ -56,17 +56,15 @@ else
     --name=${CLUSTER_NAME} \
     --state=${KOPS_STATE_STORE} \
     --cloud=aws \
-    --region=${REGION} \
     --zones=${ZONES} \
-    --control-plane-ami=${AMI_ID} \
     --control-plane-size=${MASTER_INSTANCE} \
     --control-plane-count=${MASTER_COUNT} \
     --control-plane-volume-size=${MASTER_VOLUME} \
-    --node-ami=${AMI_ID} \
     --node-size=${WORKER_INSTANCE} \
     --node-count=${WORKER_COUNT} \
-    --node-volume-size=${WORKER_VOLUME}
-
+    --node-volume-size=${WORKER_VOLUME} \
+    --image=${AMI_ID} \
+    --yes
 
     echo "Applying cluster configuration..."
 
