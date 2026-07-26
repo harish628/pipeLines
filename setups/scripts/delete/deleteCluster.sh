@@ -20,25 +20,19 @@ echo "Checking if cluster exists..."
 
 if kops get cluster "${CLUSTER_NAME}" >/dev/null 2>&1
 then
-
     echo "Cluster exists"
     echo "Deleting cluster..."
 
-    kops delete cluster \
-        "${CLUSTER_NAME}" \
-        --yes
+    kops delete cluster "${CLUSTER_NAME}" --yes
 
     echo "========================================"
     echo "Cluster deletion initiated successfully"
     echo "========================================"
-
 else
-
     echo "========================================"
     echo "Cluster does not exist"
     echo "Nothing to delete"
     echo "========================================"
-
 fi
 
 echo ""
@@ -48,31 +42,40 @@ echo "========================================"
 
 if aws s3api head-bucket --bucket "${KOPS_STATE_BUCKET}" 2>/dev/null
 then
-
     echo "S3 bucket exists"
 
     echo "Deleting all object versions..."
 
-    echo "Listing object versions..."
-
-    OUTPUT=$(aws s3api list-object-versions \
+    aws s3api list-object-versions \
         --bucket "${KOPS_STATE_BUCKET}" \
-        --output json 2>&1)
-
-    echo "AWS CLI Output:"
-    echo "$OUTPUT"
-
-    echo "$OUTPUT" | jq .
-
-    echo "$OUTPUT" | jq -c '.Versions[]?, .DeleteMarkers[]?' |
-    while read obj
+        --query 'Versions[].{Key:Key,VersionId:VersionId}' \
+        --output text |
+    while read KEY VERSION
     do
-        echo "Deleting: $obj"
+        if [ -n "$KEY" ] && [ -n "$VERSION" ]; then
+            echo "Deleting object: $KEY"
+            aws s3api delete-object \
+                --bucket "${KOPS_STATE_BUCKET}" \
+                --key "$KEY" \
+                --version-id "$VERSION"
+        fi
+    done
 
-        aws s3api delete-object \
-            --bucket "${KOPS_STATE_BUCKET}" \
-            --key "$(echo "$obj" | jq -r '.Key')" \
-            --version-id "$(echo "$obj" | jq -r '.VersionId')"
+    echo "Deleting delete markers..."
+
+    aws s3api list-object-versions \
+        --bucket "${KOPS_STATE_BUCKET}" \
+        --query 'DeleteMarkers[].{Key:Key,VersionId:VersionId}' \
+        --output text |
+    while read KEY VERSION
+    do
+        if [ -n "$KEY" ] && [ -n "$VERSION" ]; then
+            echo "Deleting delete marker: $KEY"
+            aws s3api delete-object \
+                --bucket "${KOPS_STATE_BUCKET}" \
+                --key "$KEY" \
+                --version-id "$VERSION"
+        fi
     done
 
     echo "Deleting bucket..."
@@ -84,10 +87,8 @@ then
     echo "S3 bucket deleted successfully"
 
 else
-
     echo "S3 bucket does not exist"
     echo "Skipping S3 deletion"
-
 fi
 
 echo ""
