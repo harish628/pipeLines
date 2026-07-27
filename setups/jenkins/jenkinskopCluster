@@ -175,7 +175,11 @@ pipeline {
             }
         }
         stage('Create KOps State Store') {
-
+            when {
+                    expression {
+                        params.OPERATION == 'Create'
+                    }
+                }
             steps {
         
                 withAWS(credentials: 'aws-jenkins',region: "${params.REGION}"
@@ -252,7 +256,41 @@ pipeline {
                     }
                 }
             }
-        
+        stage('KOps Cluster status') {
+
+                    when {
+                        expression {
+                            params.OPERATION == 'Status'
+                        }
+                    }
+                
+                    steps {
+                
+                        withAWS(
+                            credentials: 'aws-jenkins',
+                            region: "${params.REGION}"
+                        ) {
+                            
+                            sh """ 
+                                aws sts get-caller-identity
+                                env | grep AWS || true
+                                aws s3 ls s3://shopflow-project-s3
+                            """
+                            
+                            sh """
+                            
+                            chmod +x setups/scripts/status/clusterStatus.sh
+                
+                            bash setups/scripts/status/clusterStatus.sh \
+                            ${params.CLUSTER_NAME} \
+                            ${params.KOPS_STATE_BUCKET} \
+                            ${params.REGION}
+                
+                            """
+                        }
+                    }
+                }
+    
         
     }
 }
