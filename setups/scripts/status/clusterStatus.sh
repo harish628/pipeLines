@@ -23,6 +23,24 @@ aws sts get-caller-identity
 
 
 echo ""
+echo "===== AWS Environment ====="
+env | grep AWS || true
+
+echo ""
+echo "===== KOps Version ====="
+kops version
+
+echo ""
+echo "===== State Store ====="
+echo "$KOPS_STATE_STORE"
+
+echo ""
+echo "===== S3 Bucket ====="
+aws s3 ls "${KOPS_STATE_STORE}"
+
+
+
+echo ""
 echo ""
 echo "========================================"
 echo "Available KOps Clusters"
