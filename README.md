@@ -9,3 +9,5 @@ Add the jenkins user to root user, using below commands.
 Provide AWS Authentication Token to credentials
   Install the AWS Steps plugin
   Manage Jenkins → Credentials --> Add credentials --> Kind: AWS Credentials --> Provide Access key & Security Access key secret.
+To switch to jenkins user
+   sudo -u jenkins /bin/bash
